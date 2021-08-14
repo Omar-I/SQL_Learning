@@ -237,8 +237,106 @@ SELECT * FROM sakila.language;
 #Opcion 1 mostrando todos los datos
 SELECT * FROM sakila.film F INNER JOIN sakila.language L ON (F.language_id = L.language_id); 
 
-#Opción 2 mostrando solo el title y columas importantes omitiendo los NULL
+#Opción 2 mostrando solo el title y columnas importantes omitiendo los NULL
 SELECT F.title, F.description, F.release_year, F.language_id, L.name FROM sakila.film F INNER JOIN sakila.language L ON (F.language_id = L.language_id); 
+
+
+SELECT * FROM sakila.address;
+SELECT * FROM sakila.city;
+
+
+SELECT * FROM sakila.address A INNER JOIN sakila.city C ON (A.city_id = C.city_id);
+#Muestra la dirección de la tabla address (sakila.address) y la tabla ciudad (sakila.city)
+SELECT a.address AS Direccion, c.city AS Ciudad FROM sakila.address A INNER JOIN sakila.city C ON (A.city_id = C.city_id);
+
+
+#RIGHT JOIN
+
+SELECT * FROM sakila.customer;
+SELECT * FROM sakila.actor;
+
+#Aqui haré un RIGHT JOIN de 2 tablas que no contienen ID (No es recomendable ya que no hay un identificador)
+SELECT C.customer_id,
+C.first_name,
+C.last_name,
+A.actor_id,
+A.first_name,
+A.last_name
+FROM  sakila.customer C RIGHT JOIN sakila.actor A ON (C.last_name = A.last_name);
+
+
+#LEFT JOIN mantiene toda la información de customer y unirá por actor.last_name
+SELECT * FROM sakila.customer;
+SELECT * FROM sakila.actor;
+
+#La consulta se hace sin un identificador único, por lo cual tampoco es recomendable esta consulta porque los datos arrojados no serán del mismo registro
+SELECT C.customer_id,
+C.first_name,
+C.last_name,
+A.actor_id,
+A.first_name,
+A.last_name
+FROM sakila.customer C LEFT JOIN sakila.actor A ON (c.last_name = A.last_name);
+
+
+#Ejercicio práctico #36
+#Consulta la tabla address de la base de datos sakila.
+#Realiza un INNER JOIN con las tablas city y country
+#Mostrar las columnas address, city, country
+
+SELECT * FROM sakila.address;
+
+SELECT a.address, c.city, co.country FROM sakila.address A
+INNER JOIN sakila.city C ON (A.city_id = C.city_id)
+INNER JOIN sakila.country CO ON (c.country_id = CO.country_id);
+
+
+
+#Ejercicio práctico #37
+#Consulta la tabla customer de la base de datos sakila.
+#Realiza un LEFT JOIN con las tablas store y address
+#Mostrar las columnas first_name, address, store_id
+
+SELECT * FROM sakila.customer;
+SELECT * FROM sakila.store;
+SELECT * FROM sakila.address;
+
+SELECT c.first_name, a.address, s.store_id FROM sakila.customer c
+LEFT JOIN sakila.store s ON (c.store_id = s.store_id)
+LEFT JOIN sakila.address a ON (c.address_id = a.address_id);
+
+#Ejercicio práctico #38
+#Consulta la tabla rental de la base de datos sakila.
+#Realiza un INNER JOIN con la tabla staff
+#Mostrar las columnas rental_id, first_name
+
+SELECT * FROM sakila.rental;
+SELECT * FROM sakila.staff;
+SELECT r.rental_id, s.first_name FROM sakila.rental r
+INNER JOIN sakila.staff s ON (r.staff_id = s.staff_id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
