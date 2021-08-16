@@ -285,11 +285,12 @@ FROM sakila.customer C LEFT JOIN sakila.actor A ON (c.last_name = A.last_name);
 #Mostrar las columnas address, city, country
 
 SELECT * FROM sakila.address;
+SELECT * FROM sakila.city;
+SELECT * FROM sakila.country;
 
-SELECT a.address, c.city, co.country FROM sakila.address A
-INNER JOIN sakila.city C ON (A.city_id = C.city_id)
-INNER JOIN sakila.country CO ON (c.country_id = CO.country_id);
-
+SELECT A.address, CI.city, CO.country FROM sakila.address A
+INNER JOIN sakila.city CI ON (A.city_id = CI.city_id)
+INNER JOIN sakila.country CO ON (CI.country_id = CO.country_id);
 
 
 #Ejercicio práctico #37
@@ -298,12 +299,15 @@ INNER JOIN sakila.country CO ON (c.country_id = CO.country_id);
 #Mostrar las columnas first_name, address, store_id
 
 SELECT * FROM sakila.customer;
-SELECT * FROM sakila.store;
 SELECT * FROM sakila.address;
+SELECT * FROM sakila.store;
 
-SELECT c.first_name, a.address, s.store_id FROM sakila.customer c
-LEFT JOIN sakila.store s ON (c.store_id = s.store_id)
-LEFT JOIN sakila.address a ON (c.address_id = a.address_id);
+SELECT C.first_name, A.address, S.store_id FROM sakila.customer C
+LEFT JOIN sakila.store S ON (C.store_id = S.store_id)
+LEFT JOIN sakila.address A ON (C.address_id = A.address_id);
+# Si pongo ("S".address_id = A.address_id) en vez de (C.address_id = A.address_id), 
+#me mostrará las direcciones de las tiendas donde los clientes compraron en vez de
+#la dirección de los clientes.
 
 #Ejercicio práctico #38
 #Consulta la tabla rental de la base de datos sakila.
@@ -312,30 +316,173 @@ LEFT JOIN sakila.address a ON (c.address_id = a.address_id);
 
 SELECT * FROM sakila.rental;
 SELECT * FROM sakila.staff;
-SELECT r.rental_id, s.first_name FROM sakila.rental r
-INNER JOIN sakila.staff s ON (r.staff_id = s.staff_id);
+
+SELECT R.rental_id, S.first_name FROM sakila.rental R
+INNER JOIN sakila.staff S ON (R.staff_id = S.staff_id);
 
 
+#Funciones de agregación COUNT, AVG, SUM, MAX, MIN
+
+#SUM
+SELECT * FROM sakila.payment;
+
+#Amount muestra la suma total de una columna
+SELECT SUM(amount) FROM sakila.payment;
+
+SELECT * FROM sakila.inventory;
+#Sumando múltiples tablas
+SELECT inventory_id + film_id + store_id FROM sakila.inventory;
 
 
+#COUNT muestra el total de registros
+
+SELECT * FROM sakila.actor;
+
+SELECT COUNT(*) FROM sakila.actor;
+SELECT COUNT(*) FROM sakila.address;
+SELECT COUNT(*) FROM sakila.category;
+
+#Tambien se puede hacer registros de una columna en específico(aunque
+SELECT COUNT(first_name) FROM sakila.actor;
 
 
+#AVERAGE muestra el promedio de una  tabla
+
+SELECT * FROM sakila.payment;
+SELECT AVG(amount) FROM sakila.payment;
+
+SELECT* FROM sakila.film;
+SELECT AVG(rental_duration) FROM sakila.film;
+
+#MAX & MIN muestra los valores más altos o bajos de una columna
+
+SELECT * FROM sakila.film;
+SELECT MIN(length) FROM sakila.film;
+SELECT MAX(length) FROM sakila.film;
 
 
+#Ejercicio práctico #44
+#Consulta la tabla rental de la base de datos sakila.
+#Realiza un COUNT de  la columna rental_id
+
+SELECT * FROM sakila.rental;
+SELECT COUNT(rental_id) FROM sakila.rental;
+
+#Ejercicio práctico #45
+#Consulta la tabla payment de la base de datos sakila.
+#Realiza un MAX de  la columna amount
+
+SELECT * FROM sakila.payment;
+SELECT MAX(amount) FROM sakila.payment;
 
 
+#GROUP BY
+
+SELECT last_name FROM sakila.actor;
+
+SELECT last_name FROM sakila.actor
+GROUP BY last_name;
+
+#Muestra los datos de last_name sin repetir y agrega una columna contando cuantas veces están
+SELECT last_name, COUNT(*) FROM sakila.actor
+GROUP BY last_name;
 
 
+SELECT * FROM sakila.payment;
+SELECT * FROM sakila.customer;
+
+#Este query muestra la cantidad de dinero que gastó un cliente y cuántas compras hizo
+SELECT
+C.customer_id,
+C.first_name,
+C.last_name,
+SUM(p.amount), COUNT(*) FROM sakila.payment P
+INNER JOIN sakila.customer C ON (C.customer_id = P.customer_id)
+GROUP BY C.customer_id, C.first_name, C.last_name;
+#Si reemplazo GROUP BY 1,2,3 es el mismo resultado del query(toma las columnas por el orden)
 
 
+#Ejercicio práctico #48
+#Consulta la tabla rental de la base de datos sakila.
+#Realiza un MAX de  la columna rental_date 
+
+SELECT * FROM sakila.rental;
+SELECT customer_id, MAX(rental_date) FROM sakila.rental
+GROUP BY customer_id;
+#No tiene sentido que se agrupe por customer_id porque no tendría un orden cronológico
 
 
+#HAVING
+
+SELECT * FROM sakila.actor;
+#Cuenta los apellidos individuales de la columna
+SELECT last_name, COUNT(*) FROM sakila.actor GROUP BY 1;
+
+#Muestra los apellidos que tengan más de 3 registros
+SELECT last_name, COUNT(*) FROM sakila.actor GROUP BY 1
+HAVING COUNT(*) > 3;
+
+#Query que muestra el gasto menos a 100 que los clientes han hecho
+SELECT * FROM sakila.payment;
+SELECT C.customer_id, C.last_name, C.first_name,
+SUM(p.amount) FROM sakila.payment P
+INNER JOIN sakila.customer C ON (C.customer_id = P.customer_id)
+GROUP BY 1,2,3 
+HAVING SUM(P.amount) < 100
+ORDER BY SUM(P.amount) DESC;
+
+#Ejercicio práctico #51
+
+#Consulta la tabla actor de la base de datos sakila.
+#Realiza un COUNT de  last_name
+#Mostrar cuando el COUNT sea mayor de 2
+
+SELECT * FROM sakila.actor;
+
+SELECT last_name, COUNT(*) FROM sakila.actor
+GROUP BY last_name
+HAVING COUNT(*) > 2;
 
 
+#Ejercicios complementarios. #5
+
+#¿Qué actores tienen el primer nombre 'Scarlett'?
+SELECT * FROM sakila.actor;
+SELECT actor_id, first_name, last_name FROM sakila.actor
+WHERE first_name = "Scarlett";
+
+#¿Qué actores tienen el apellido "Johansson"?
+SELECT * FROM sakila.actor;
+SELECT actor_id, first_name, last_name FROM sakila.actor
+WHERE last_name = "Johansson";
+
+#¿Cuántos apellidos de actores distintos hay?
+SELECT * FROM sakila.actor;
+SELECT COUNT(DISTINCT last_name) FROM sakila.actor;
 
 
+#¿Qué apellidos no se repiten?
+SELECT * FROM sakila.actor;
+SELECT last_name FROM sakila.actor GROUP BY last_name HAVING COUNT(*) = 1;
 
+#¿Qué actor ha aparecido en la mayoría de las películas?
 
+select actor.actor_id, actor.first_name, actor.last_name,
+
+       count(actor_id) as film_count
+
+from actor join film_actor using (actor_id)
+
+group by actor_id
+
+order by film_count desc;
+
+#¿Se puede alquilar ‘Academy Dinosaur’ en la tienda 1?
+select film.film_id, film.title, store.store_id, inventory.inventory_id
+
+from inventory join store using (store_id) join film using (film_id)
+
+where film.title = 'Academy Dinosaur' and store.store_id = 1;
 
 
 
